@@ -6,6 +6,8 @@ export const theme = {
     zendiPurple: "#773DFD",
     zendiBlack30: "#B9B9C6",
     offWhite: "#F9F9F9",
+    zendiGray: "#ABABAB",
+    lightGray: "#F5F5F5",
   },
 } as const;
 
