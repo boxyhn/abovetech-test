@@ -5,8 +5,8 @@ import ChatInput from "@/components/chat/ChatInput";
 
 export default function Home() {
   return (
-    <div className="chat-input-bg">
-      <ChatHeader />
+    <div className="flex flex-col h-screen">
+      <ChatHeader onBack={() => {}} onReport={() => {}} coin={24500} />
       <ChatInput onSendMessage={() => {}} />
     </div>
   );
