@@ -8,8 +8,10 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-pretendard);
+  --color-zendi-blue: #5791FF;
+  --color-zendi-black: #161741;
+  --color-zendi-purple: #773DFD;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,5 +24,42 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-pretendard), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.shadow-left-right {
+  box-shadow: 6px 0 8px -6px rgba(0, 0, 0, 0.06), -6px 0 8px -6px rgba(0, 0, 0, 0.06);
+}
+
+.combined-gradient-bg {
+  position: relative;
+  overflow: hidden;
+  background: rgba(226, 226, 226, 0.1);
+}
+
+.combined-gradient-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(226, 226, 226, 0.2) 0%, rgba(226, 226, 226, 1) 100%);
+  opacity: 0.1;
+  filter: blur(30px);
+  backdrop-filter: blur(60px);
+  z-index: -2;
+}
+
+.combined-gradient-bg::after {
+  content: "";
+  position: absolute;
+  width: 562px;
+  height: 562px;
+  top: -83px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse 51.26% 64.53% at 52.85% 58.04%, rgba(119, 61, 253, 0.24) 0%, transparent 100%);
+  mix-blend-mode: multiply;
+  opacity: 0.8;
+  filter: blur(30px);
+  backdrop-filter: blur(60px);
+  z-index: -1;
 }
