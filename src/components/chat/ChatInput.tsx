@@ -54,12 +54,21 @@ export default function ChatInput({ onSendMessage }: ChatInputProps) {
   }, []);
 
   // Styles
-  const wrapperClasses = "fixed bottom-0 left-0 right-0 p-2.5 chat-input-bg drop-shadow-custom rounded-t-xl border border-white/20";
-  const containerClasses = "flex items-center justify-between rounded-3xl border border-off-white py-2 w-full drop-shadow-custom pl-3 pr-4 gap-2";
-  const textareaClasses = "flex-1 outline-none text-body bg-transparent resize-none overflow-y-auto py-1";
+  const wrapperClasses =
+    "fixed bottom-0 left-0 right-0 p-2.5 drop-shadow-custom";
+  const backgroundClasses =
+    "absolute inset-0 chat-input-bg rounded-t-xl border border-white/20 -z-10";
+  const containerClasses =
+    "relative flex items-center justify-between rounded-3xl border border-off-white bg-transparent py-2 w-full drop-shadow-custom pl-3 pr-4 gap-2";
+  const textareaClasses =
+    "flex-1 outline-none text-body bg-transparent resize-none overflow-y-auto py-1";
 
   return (
     <div className={wrapperClasses}>
+      {/* Background layer */}
+      <div className={backgroundClasses} />
+
+      {/* Content layer */}
       <div className={containerClasses}>
         <div className="flex items-center gap-2 w-full">
           <ChatInputButton
@@ -73,7 +82,7 @@ export default function ChatInput({ onSendMessage }: ChatInputProps) {
               size={ICON_SIZE.plus}
             />
           </ChatInputButton>
-          
+
           <textarea
             ref={textareaRef}
             value={message}
@@ -89,7 +98,7 @@ export default function ChatInput({ onSendMessage }: ChatInputProps) {
             }}
           />
         </div>
-        
+
         <ChatInputButton
           onClick={handleSend}
           variant="send"
