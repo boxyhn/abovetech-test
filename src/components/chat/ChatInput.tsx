@@ -64,54 +64,59 @@ export default function ChatInput({ onSendMessage }: ChatInputProps) {
     "flex-1 outline-none text-body bg-transparent resize-none overflow-y-auto py-1";
 
   return (
-    <div className={wrapperClasses}>
-      {/* Background layer */}
-      <div className={backgroundClasses} />
+    <>
+      {/* Input 영역 밑으로 화면이 내려가지 않도록 빈 공간 추가 */}
+      <div className="h-[70px]" />
 
-      {/* Content layer */}
-      <div className={containerClasses}>
-        <div className="flex items-center gap-2 w-full">
+      <div className={wrapperClasses}>
+        {/* Background layer */}
+        <div className={backgroundClasses} />
+
+        {/* Content layer */}
+        <div className={containerClasses}>
+          <div className="flex items-center gap-2 w-full">
+            <ChatInputButton
+              onClick={handlePlusClick}
+              aria-label="Add attachment"
+              variant="icon"
+              disabled={!isMessageEmpty}
+            >
+              <PlusIcon
+                color={isMessageEmpty ? colors.zendiBlue : colors.zendiBlack30}
+                size={ICON_SIZE.plus}
+              />
+            </ChatInputButton>
+
+            <textarea
+              ref={textareaRef}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="호키에게 메세지를 보내보세요"
+              className={textareaClasses}
+              rows={1}
+              style={{
+                lineHeight: `${LINE_HEIGHT}`,
+                minHeight: `${MIN_TEXTAREA_HEIGHT}px`,
+                maxHeight: `${MAX_TEXTAREA_HEIGHT}px`,
+              }}
+            />
+          </div>
+
           <ChatInputButton
-            onClick={handlePlusClick}
-            aria-label="Add attachment"
-            variant="icon"
-            disabled={!isMessageEmpty}
+            onClick={handleSend}
+            variant="send"
+            className={!isMessageEmpty ? "bg-zendi-blue" : ""}
+            disabled={isMessageEmpty}
+            aria-label="Send message"
           >
-            <PlusIcon
-              color={isMessageEmpty ? colors.zendiBlue : colors.zendiBlack30}
-              size={ICON_SIZE.plus}
+            <SendIcon
+              color={!isMessageEmpty ? "white" : colors.zendiBlack30}
+              size={ICON_SIZE.send}
             />
           </ChatInputButton>
-
-          <textarea
-            ref={textareaRef}
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="호키에게 메세지를 보내보세요"
-            className={textareaClasses}
-            rows={1}
-            style={{
-              lineHeight: `${LINE_HEIGHT}`,
-              minHeight: `${MIN_TEXTAREA_HEIGHT}px`,
-              maxHeight: `${MAX_TEXTAREA_HEIGHT}px`,
-            }}
-          />
         </div>
-
-        <ChatInputButton
-          onClick={handleSend}
-          variant="send"
-          className={!isMessageEmpty ? "bg-zendi-blue" : ""}
-          disabled={isMessageEmpty}
-          aria-label="Send message"
-        >
-          <SendIcon
-            color={!isMessageEmpty ? "white" : colors.zendiBlack30}
-            size={ICON_SIZE.send}
-          />
-        </ChatInputButton>
       </div>
-    </div>
+    </>
   );
 }
