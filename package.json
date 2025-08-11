@@ -1,6 +1,9 @@
 {
-  "name": "abovetech-test",
-  "version": "0.1.0",
+  "name": "hokidongja-saju",
+  "version": "1.0.0",
+  "description": "호키동자와 함께하는 AI 사주 상담 서비스 - 친근한 어린 수행자가 안내하는 사주팔자 분석",
+  "keywords": ["saju", "fortune-telling", "ai-chatbot", "korean-traditional", "nextjs"],
+  "author": "AboveTech",
   "private": true,
   "scripts": {
     "dev": "npm run sync-theme && next dev --turbopack",
