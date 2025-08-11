@@ -45,6 +45,7 @@ export interface Database {
           session_id: string
           role: 'user' | 'assistant'
           content: string
+          phase: 'GATHERING_INFO' | 'ANALYZING' | 'READY'
         }
         Insert: {
           id?: number
@@ -52,6 +53,7 @@ export interface Database {
           session_id: string
           role: 'user' | 'assistant'
           content: string
+          phase?: 'GATHERING_INFO' | 'ANALYZING' | 'READY'
         }
         Update: {
           id?: number
@@ -59,6 +61,7 @@ export interface Database {
           session_id?: string
           role?: 'user' | 'assistant'
           content?: string
+          phase?: 'GATHERING_INFO' | 'ANALYZING' | 'READY'
         }
       }
     }
