@@ -2,7 +2,13 @@
   "name": "hokidongja-saju",
   "version": "1.0.0",
   "description": "호키동자와 함께하는 AI 사주 상담 서비스 - 친근한 어린 수행자가 안내하는 사주팔자 분석",
-  "keywords": ["saju", "fortune-telling", "ai-chatbot", "korean-traditional", "nextjs"],
+  "keywords": [
+    "saju",
+    "fortune-telling",
+    "ai-chatbot",
+    "korean-traditional",
+    "nextjs"
+  ],
   "author": "AboveTech",
   "private": true,
   "scripts": {
@@ -17,7 +23,8 @@
     "next": "15.4.6",
     "openai": "^5.12.2",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -25,6 +32,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/uuid": "^10.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.4.6",
     "tailwindcss": "^4",
