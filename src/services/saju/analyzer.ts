@@ -57,9 +57,10 @@ export class SajuAnalyzerService {
   async answerQuestion(
     session: Session,
     conversationHistory: string,
-    question: string
+    question: string,
+    analysisResult?: string | null
   ): Promise<string | null> {
-    const prompt = this.buildQAPrompt(session, conversationHistory, question)
+    const prompt = this.buildQAPrompt(session, conversationHistory, question, analysisResult)
     
     const response = await openAIClient.createCompletion(
       [
@@ -82,7 +83,8 @@ export class SajuAnalyzerService {
   private buildQAPrompt(
     session: Session,
     conversationHistory: string,
-    question: string
+    question: string,
+    analysisResult?: string | null
   ): string {
     return `
 [사용자 정보]
@@ -90,6 +92,9 @@ export class SajuAnalyzerService {
 생년월일: ${session.birth_date}
 태어난 시간: ${session.birth_time}
 성별: ${session.gender}
+
+[초기 사주 분석 결과]
+${analysisResult || '분석 중...'}
 
 [이전 대화 내용]
 ${conversationHistory}

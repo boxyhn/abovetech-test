@@ -148,11 +148,12 @@ export class ChatService {
       const messages = await messageRepository.findQAMessages(session.id)
       const conversationHistory = messageRepository.formatConversationHistory(messages)
 
-      // 2. 답변 생성
+      // 2. 저장된 분석 결과와 함께 답변 생성
       const answer = await sajuAnalyzerService.answerQuestion(
         session,
         conversationHistory,
-        userMessage
+        userMessage,
+        session.analysis_result
       )
 
       if (!answer) {
@@ -192,8 +193,11 @@ export class ChatService {
 
       console.log('Initial analysis completed:', analysisResult)
 
-      // 2. 상태를 READY로 변경
-      await sessionRepository.updateStatus(sessionId, 'READY')
+      // 2. 분석 결과를 세션에 저장하고 상태를 READY로 변경
+      await sessionRepository.update(sessionId, {
+        status: 'READY',
+        analysis_result: analysisResult
+      })
 
       // 3. 완료 메시지 저장 (READY phase로 표시)
       await messageRepository.create({
