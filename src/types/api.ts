@@ -15,10 +15,8 @@ export interface SendMessageResponse {
   message?: string  // 추가 메시지 (상태 변경 시 등)
 }
 
-export interface ApiError {
-  error: string
-  code?: string
-}
+// ApiError는 types/errors.ts에서 정의되어 있음
+// 중복 제거를 위해 여기서는 삭제
 
 // Validation helpers
 export function isValidSessionId(id: unknown): id is string {
