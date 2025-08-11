@@ -8,8 +8,14 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-pretendard);
+  --color-zendi-blue: #5791FF;
+  --color-zendi-black: #161741;
+  --color-zendi-purple: #773DFD;
+  --color-zendi-black30: #B9B9C6;
+  --color-off-white: #F9F9F9;
+  --color-zendi-gray: #ABABAB;
+  --color-light-gray: #F5F5F5;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -20,7 +26,135 @@
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  @apply bg-background text-foreground text-[14px] leading-[1.5] tracking-[-0.02em];
+  font-family: var(--font-pretendard), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
+
+@layer utilities {
+  .text-body {
+    @apply text-[14px] leading-[1.5] tracking-[-0.02em];
+  }
+
+  .text-detail {
+    @apply text-[12px] leading-[1.5] tracking-[-0.03em];
+  }
+
+  .text-label {
+    @apply text-[11px] leading-[1.5] tracking-[-0.02em];
+  }
+
+  .text-caption {
+    @apply text-[10px] leading-[1.5] tracking-[-0.03em];
+  }
+
+  .shadow-left-right {
+    box-shadow: 6px 0 8px -6px rgba(0, 0, 0, 0.06), -6px 0 8px -6px rgba(0, 0, 0, 0.06);
+  }
+  
+  .drop-shadow-custom {
+    filter: drop-shadow(0px 0px 30px rgba(108, 108, 108, 0.14));
+  }
+
+  .drop-shadow-other-profile {
+    filter: drop-shadow(0px 10px 40px rgba(160, 160, 160, 0.4));
+  }
+
+  .drop-shadow-other-message {
+    filter: drop-shadow(0px 10px 40px rgba(233, 233, 233, 0.4));
+  }
+
+  .drop-shadow-user-message {
+    filter: drop-shadow(0px 2px 10px rgba(217, 217, 217, 0.14));
+  }
+  
+  .typing-ball {
+    @apply inline-block w-1 h-1 rounded-full;
+    animation: custom-bounce 1s infinite;
+    box-shadow: 0 2px 4px rgba(87, 145, 255, 0.3);
+  }
+  
+  .typing-ball-1 {
+    background: linear-gradient(135deg, #5791FF 0%, #6B98FF 100%);
+    animation-delay: 0ms;
+  }
+  
+  .typing-ball-2 {
+    background: linear-gradient(135deg, #7A9CFF 0%, #9A94FF 100%);
+    animation-delay: 200ms;
+  }
+  
+  .typing-ball-3 {
+    background: linear-gradient(135deg, #A394FF 0%, #B394FF 100%);
+    animation-delay: 400ms;
+  }
+  
+  .avatar-small {
+    @apply w-6 h-6 rounded-full flex-shrink-0;
+  }
+  
+  .message-bubble {
+    @apply px-2.5 py-2 text-zendi-black flex gap-1;
+  }
+  
+  .message-bubble-user {
+    @apply bg-light-gray rounded-xl;
+    filter: drop-shadow(0px 2px 10px rgba(217, 217, 217, 0.14));
+  }
+  
+  .message-bubble-other {
+    @apply bg-white rounded-2xl;
+    filter: drop-shadow(0px 10px 40px rgba(233, 233, 233, 0.4));
+    border-top-left-radius: 0.125rem;
+  }
+}
+
+@layer components {
+  .combined-gradient-bg {
+    @apply relative overflow-hidden bg-gray-200/10;
+  }
+
+  .combined-gradient-bg::before {
+    content: "";
+    @apply absolute inset-0 opacity-10 blur-[30px] backdrop-blur-[60px] -z-20;
+    background: linear-gradient(to bottom, rgba(226, 226, 226, 0.2) 0%, rgba(226, 226, 226, 1) 100%);
+  }
+
+  .combined-gradient-bg::after {
+    content: "";
+    @apply absolute w-[562px] h-[562px] -top-[83px] left-1/2 -translate-x-1/2;
+    @apply mix-blend-multiply opacity-80 blur-[30px] backdrop-blur-[60px] -z-10;
+    background: radial-gradient(ellipse 51.26% 64.53% at 52.85% 58.04%, rgba(119, 61, 253, 0.24) 0%, transparent 100%);
+  }
+
+  .chat-input-bg {
+    @apply relative;
+    /* Fill: Linear 80% (왼쪽 위 → 오른쪽 아래) */
+    background: linear-gradient(120deg, rgba(245, 245, 245, 0.8) 0%, rgba(255, 255, 255, 0.8) 100%);
+    /* Stroke: FFFFFF 20% */
+    box-shadow: inset 0 0 0 1.6px rgba(255, 255, 255, 0.2);
+  }
+  
+  .chat-input-bg::after {
+    content: '';
+    @apply absolute inset-0 rounded-t-xl pointer-events-none;
+    /* Stroke: Linear 30% (왼쪽 위 → 오른쪽 아래) */
+    background: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.3) 100%);
+    box-shadow: inset 0 0 0 1.6px transparent;
+    mask: linear-gradient(120deg, transparent 0%, black 100%);
+  }
+}
+
+@keyframes custom-bounce {
+  0%, 100% {
+    transform: translateY(-3px);
+  }
+  50% {
+    transform: translateY(3px);
+  }
+}
+
+.animate-custom-bounce {
+  animation: custom-bounce 1s infinite;
+}
+
+
