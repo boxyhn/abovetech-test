@@ -2,7 +2,7 @@ import { supabase } from '@/lib/supabase'
 import { NextResponse } from 'next/server'
 import type { CreateSessionResponse, ApiError } from '@/types/api'
 
-const INITIAL_MESSAGE = "안녕하세요! 사주풀이를 위해 당신의 정보를 알려주세요. 이름, 생년월일, 태어난 시간, 성별이 필요해요."
+const INITIAL_MESSAGE = "와! 안녕하세요 선생님! 😊 저는 호키동자예요! 선생님의 사주를 봐드리려고 왔어요! ✨ 먼저 선생님에 대해 알려주시면 정확한 사주를 봐드릴게요! 이름이랑 생년월일, 태어난 시간, 성별을 편하게 말씀해주세요!"
 
 export async function POST(): Promise<NextResponse<CreateSessionResponse | ApiError>> {
   try {

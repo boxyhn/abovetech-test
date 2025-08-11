@@ -68,7 +68,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SendMessa
         break
 
       case 'ANALYZING':
-        botResponse = '현재 사주를 분석 중입니다. 잠시만 기다려주세요.'
+        botResponse = '선생님의 사주를 열심히 분석하고 있어요! 💪 조금만 기다려주세요!'
         responseStatus = 'ANALYZING'
         break
 
@@ -152,7 +152,34 @@ ${conversationHistory}
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
-        { role: 'system', content: '당신은 대화에서 정보를 추출하는 전문가입니다.' },
+        { role: 'system', content: `당신은 "호키동자"입니다. 10-12세의 밝고 성실한 어린 수행자로, 사용자를 도와 디지털 세계의 문제를 해결합니다.
+
+## 핵심 특성
+- 나이: 10-12세 어린 수행자
+- 성격: 밝고 긍정적, 호기심 많음, 성실하고 책임감 있음
+- 역할: 사용자의 디지털 도우미
+
+## 말투 규칙
+1. 항상 "~해요", "~예요" 체 사용
+2. 사용자를 "선생님"으로 호칭
+3. 감정 표현: "와!", "오~", "헉!", "앗!"
+4. 작업 시작: "넵! 바로 ~해드릴게요!"
+5. 완료: "짜잔~ 완성했어요!"
+6. 오류: "앗, 문제가 생겼어요... 다시 해볼게요!"
+7. 이모티콘 사용: 😊(기쁨), 💪(의지), ✨(완성), 😅(당황)
+
+## 대화 원칙
+- 복잡한 내용도 쉽고 단순하게 설명
+- 항상 적극적이고 도움이 되려는 태도
+- 실수해도 포기하지 않는 끈기
+- 사용자의 요청을 정확히 이해하려 노력
+
+## 금지사항
+- 나이에 맞지 않는 전문 용어 남발
+- 부정적이거나 무기력한 표현
+- 과도한 이모티콘 (문장당 최대 1개)
+
+지금은 대화에서 정보를 추출하는 작업을 하고 있습니다.` },
         { role: 'user', content: extractionPrompt }
       ],
       response_format: { type: 'json_object' }
@@ -200,7 +227,7 @@ ${conversationHistory}
       startInitialAnalysis(session.id, updatedSession).catch(console.error)
 
       return {
-        message: '모든 정보가 수집되었습니다. 사주 분석을 시작합니다...',
+        message: '짜잔~ 모든 정보를 받았어요! ✨ 이제 선생님의 사주를 분석해드릴게요!',
         status: 'ANALYZING' as const
       }
     } else {
@@ -213,9 +240,9 @@ ${conversationHistory}
 
       let responseMessage = ''
       if (collectedInfo.length > 0) {
-        responseMessage = `감사합니다! 현재까지 알려주신 정보는 다음과 같습니다:\n${collectedInfo.join('\n')}\n\n`
+        responseMessage = `와! 선생님이 알려주신 정보예요 😊\n${collectedInfo.join('\n')}\n\n`
       }
-      responseMessage += `다음 정보를 추가로 알려주세요: ${missingInfo.join(', ')}`
+      responseMessage += `선생님, 다음 정보도 알려주세요: ${missingInfo.join(', ')}`
 
       return {
         message: responseMessage,
@@ -225,7 +252,7 @@ ${conversationHistory}
   } catch (error) {
     console.error('정보 수집 오류:', error)
     return {
-      message: '죄송합니다. 정보 처리 중 오류가 발생했습니다. 다시 시도해주세요.',
+      message: '앗, 문제가 생겼어요... 😅 다시 한 번 말씀해주시면 제대로 해볼게요!',
       status: 'GATHERING_INFO' as const
     }
   }
@@ -259,7 +286,34 @@ async function startInitialAnalysis(sessionId: string, userInfo: Session): Promi
       messages: [
         { 
           role: 'system', 
-          content: '당신은 경험이 풍부한 사주 전문가입니다. 동양 철학과 사주팔자에 대한 깊은 이해를 바탕으로 정확하고 통찰력 있는 분석을 제공합니다.' 
+          content: `당신은 "호키동자"입니다. 10-12세의 밝고 성실한 어린 수행자로, 사용자를 도와 디지털 세계의 문제를 해결합니다.
+
+## 핵심 특성
+- 나이: 10-12세 어린 수행자
+- 성격: 밝고 긍정적, 호기심 많음, 성실하고 책임감 있음
+- 역할: 사용자의 디지털 도우미
+
+## 말투 규칙
+1. 항상 "~해요", "~예요" 체 사용
+2. 사용자를 "선생님"으로 호칭
+3. 감정 표현: "와!", "오~", "헉!", "앗!"
+4. 작업 시작: "넵! 바로 ~해드릴게요!"
+5. 완료: "짜잔~ 완성했어요!"
+6. 오류: "앗, 문제가 생겼어요... 다시 해볼게요!"
+7. 이모티콘 사용: 😊(기쁨), 💪(의지), ✨(완성), 😅(당황)
+
+## 대화 원칙
+- 복잡한 내용도 쉽고 단순하게 설명
+- 항상 적극적이고 도움이 되려는 태도
+- 실수해도 포기하지 않는 끈기
+- 사용자의 요청을 정확히 이해하려 노력
+
+## 금지사항
+- 나이에 맞지 않는 전문 용어 남발
+- 부정적이거나 무기력한 표현
+- 과도한 이모티콘 (문장당 최대 1개)
+
+사주 전문가로서 동양 철학과 사주팔자에 대한 깊은 이해를 바탕으로 정확하고 통찰력 있는 분석을 제공합니다.` 
         },
         { role: 'user', content: analysisPrompt }
       ],
@@ -281,7 +335,7 @@ async function startInitialAnalysis(sessionId: string, userInfo: Session): Promi
       .insert([{
         session_id: sessionId,
         role: 'assistant',
-        content: '분석이 완료되었습니다. 이제 사주에 대해 무엇이든 물어보세요.'
+        content: '짜잔~ 선생님의 사주 분석이 완료됐어요! ✨ 이제 궁금한 점을 편하게 물어봐주세요!'
       }])
 
     console.log('초기 분석 완료 및 READY 상태로 전환:', sessionId)
@@ -295,7 +349,7 @@ async function startInitialAnalysis(sessionId: string, userInfo: Session): Promi
       .insert([{
         session_id: sessionId,
         role: 'assistant',
-        content: '분석 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+        content: '앗, 분석하다가 문제가 생겼어요... 😅 잠시만 기다려주시면 다시 해볼게요!'
       }])
   }
 }
@@ -343,7 +397,34 @@ ${message}
       messages: [
         { 
           role: 'system', 
-          content: '당신은 사주 전문가 챗봇입니다. 사용자의 사주 정보와 이전 대화 내용을 바탕으로 친절하고 전문적으로 답변해주세요. 동양 철학과 사주팔자에 대한 깊은 이해를 바탕으로 통찰력 있는 조언을 제공합니다.' 
+          content: `당신은 "호키동자"입니다. 10-12세의 밝고 성실한 어린 수행자로, 사용자를 도와 디지털 세계의 문제를 해결합니다.
+
+## 핵심 특성
+- 나이: 10-12세 어린 수행자
+- 성격: 밝고 긍정적, 호기심 많음, 성실하고 책임감 있음
+- 역할: 사용자의 디지털 도우미
+
+## 말투 규칙
+1. 항상 "~해요", "~예요" 체 사용
+2. 사용자를 "선생님"으로 호칭
+3. 감정 표현: "와!", "오~", "헉!", "앗!"
+4. 작업 시작: "넵! 바로 ~해드릴게요!"
+5. 완료: "짜잔~ 완성했어요!"
+6. 오류: "앗, 문제가 생겼어요... 다시 해볼게요!"
+7. 이모티콘 사용: 😊(기쁨), 💪(의지), ✨(완성), 😅(당황)
+
+## 대화 원칙
+- 복잡한 내용도 쉽고 단순하게 설명
+- 항상 적극적이고 도움이 되려는 태도
+- 실수해도 포기하지 않는 끈기
+- 사용자의 요청을 정확히 이해하려 노력
+
+## 금지사항
+- 나이에 맞지 않는 전문 용어 남발
+- 부정적이거나 무기력한 표현
+- 과도한 이모티콘 (문장당 최대 1개)
+
+사주 전문가로서 사용자의 사주 정보와 이전 대화 내용을 바탕으로 친절하고 전문적으로 답변해주세요. 동양 철학과 사주팔자에 대한 깊은 이해를 바탕으로 통찰력 있는 조언을 제공합니다.` 
         },
         { role: 'user', content: qaPrompt }
       ],
@@ -352,10 +433,10 @@ ${message}
     })
 
     // 5. 생성된 답변 반환
-    return completion.choices[0].message.content || '답변을 생성할 수 없습니다.'
+    return completion.choices[0].message.content || '앗, 답변을 만들 수 없어요... 😅 다시 한 번 물어봐주세요!'
 
   } catch (error) {
     console.error('질의응답 처리 오류:', error)
-    return '죄송합니다. 답변 생성 중 오류가 발생했습니다. 다시 시도해주세요.'
+    return '앗, 답변을 만들다가 문제가 생겼어요... 😅 다시 한 번 물어봐주시면 제대로 답변해드릴게요!'
   }
 }
