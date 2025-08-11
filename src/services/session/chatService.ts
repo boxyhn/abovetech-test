@@ -207,12 +207,15 @@ export class ChatService {
     } catch (error) {
       console.error('Background analysis error:', error)
       
+      // 분석 실패 시 세션을 다시 GATHERING_INFO 상태로 복구
+      await sessionRepository.updateStatus(sessionId, 'GATHERING_INFO')
+      
       // 오류 메시지 저장
       await messageRepository.create({
         session_id: sessionId,
         role: 'assistant',
         content: STATUS_MESSAGES.ERROR_ANALYSIS,
-        phase: 'ANALYZING'
+        phase: 'GATHERING_INFO'
       })
     }
   }

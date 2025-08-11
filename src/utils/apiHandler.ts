@@ -2,13 +2,40 @@ import { NextRequest, NextResponse } from 'next/server'
 import { ApiError, createError } from '@/types/errors'
 
 /**
- * API 핸들러 래퍼 - 공통 에러 처리 및 응답 표준화
+ * API 핸들러 래퍼 - 일반 라우트용
  */
-export function apiHandler<T = unknown, P = unknown>(
-  handler: (req: NextRequest, params?: P) => Promise<T>
+export function apiHandler<T = unknown>(
+  handler: (req: NextRequest) => Promise<T>
 ) {
-  return async (req: NextRequest, params?: P): Promise<NextResponse> => {
+  return async (req: NextRequest): Promise<NextResponse> => {
     try {
+      const result = await handler(req)
+      
+      // 이미 NextResponse인 경우 그대로 반환
+      if (result instanceof NextResponse) {
+        return result
+      }
+      
+      // 일반 객체인 경우 성공 응답으로 래핑
+      return NextResponse.json(result)
+    } catch (error) {
+      return handleApiError(error)
+    }
+  }
+}
+
+/**
+ * Dynamic Route 핸들러 래퍼
+ */
+export function dynamicApiHandler<T = unknown, P = Record<string, string>>(
+  handler: (req: NextRequest, params: P) => Promise<T>
+) {
+  return async (
+    req: NextRequest,
+    context: { params: Promise<P> }
+  ): Promise<NextResponse> => {
+    try {
+      const params = await context.params
       const result = await handler(req, params)
       
       // 이미 NextResponse인 경우 그대로 반환
@@ -52,6 +79,14 @@ export async function parseRequestBody<T>(
   validator?: (body: unknown) => body is T
 ): Promise<T> {
   try {
+    // Content-Length 확인 (10MB 제한)
+    const contentLength = req.headers.get('content-length')
+    const MAX_SIZE = 10 * 1024 * 1024 // 10MB
+    
+    if (contentLength && parseInt(contentLength) > MAX_SIZE) {
+      throw createError.invalidRequest('요청 크기가 너무 큽니다. (최대 10MB)')
+    }
+    
     const body = await req.json()
     
     if (validator && !validator(body)) {

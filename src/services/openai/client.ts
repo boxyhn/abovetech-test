@@ -15,6 +15,11 @@ class OpenAIClient {
         throw new Error('OPENAI_API_KEY is not configured')
       }
 
+      // API 키 형식 검증
+      if (!apiKey.startsWith('sk-')) {
+        throw new Error('Invalid OpenAI API key format')
+      }
+
       this.instance = new OpenAI({ apiKey })
     }
 

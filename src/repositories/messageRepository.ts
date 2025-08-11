@@ -143,6 +143,7 @@ export class MessageRepository extends BaseRepository {
    */
   formatConversationHistory(messages: Message[]): string {
     return messages
+      .filter((msg) => msg.content != null) // null/undefined 체크
       .map((msg) => `${msg.role}: ${msg.content}`)
       .join('\n')
   }

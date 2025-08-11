@@ -1,16 +1,13 @@
 import { supabase } from '@/lib/supabase'
 import { NextRequest } from 'next/server'
 import { createError } from '@/types/errors'
-import { apiHandler } from '@/utils/apiHandler'
+import { dynamicApiHandler } from '@/utils/apiHandler'
 
-type RouteParams = {
-  params: Promise<{ id: string }>
-}
-
-export const GET = apiHandler<unknown, RouteParams>(async (_request: NextRequest, context?: RouteParams) => {
-  if (!context) throw createError.invalidRequest()
-  const { params } = context
-  const { id } = await params
+export const GET = dynamicApiHandler<unknown, { id: string }>(async (
+  _request: NextRequest,
+  params
+) => {
+  const { id } = params
 
   // 세션 정보 조회
   const { data: session, error } = await supabase
