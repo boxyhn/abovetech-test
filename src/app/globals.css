@@ -97,7 +97,11 @@ body {
   }
   
   .message-bubble-user {
-    @apply bg-light-gray rounded-xl;
+    @apply rounded-xl relative;
+    background: 
+      linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3)),
+      rgb(245, 245, 245);
+    background-blend-mode: luminosity;
     filter: drop-shadow(0px 2px 10px rgba(217, 217, 217, 0.14));
   }
   
