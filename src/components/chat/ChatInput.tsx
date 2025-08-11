@@ -27,6 +27,7 @@ export default function ChatInput({
   placeholder = "호키에게 메세지를 보내보세요",
 }: ChatInputProps) {
   const [message, setMessage] = useState("");
+  const [isComposing, setIsComposing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-resize textarea
@@ -50,15 +51,27 @@ export default function ChatInput({
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-      if (e.key === "Enter" && !e.shiftKey) {
+      // 한글 입력 중일 때는 Enter 키 처리하지 않음
+      if (e.key === "Enter" && !e.shiftKey && !isComposing) {
         e.preventDefault();
         if (!disabled) {
           handleSend();
         }
       }
     },
-    [handleSend, disabled]
+    [handleSend, disabled, isComposing]
   );
+
+  // 한글 입력 시작/종료 감지
+  const handleCompositionStart = useCallback(() => {
+    setIsComposing(true);
+  }, []);
+
+  const handleCompositionEnd = useCallback((e: React.CompositionEvent<HTMLTextAreaElement>) => {
+    setIsComposing(false);
+    // 입력이 완료된 값으로 업데이트
+    setMessage(e.currentTarget.value);
+  }, []);
 
   const handlePlusClick = useCallback(() => {
     // TODO: 파일 첨부 기능 구현
@@ -103,6 +116,8 @@ export default function ChatInput({
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyDown}
+              onCompositionStart={handleCompositionStart}
+              onCompositionEnd={handleCompositionEnd}
               placeholder={placeholder}
               className={textareaClasses}
               rows={1}
@@ -110,6 +125,7 @@ export default function ChatInput({
                 lineHeight: `${LINE_HEIGHT}`,
                 minHeight: `${MIN_TEXTAREA_HEIGHT}px`,
                 maxHeight: `${MAX_TEXTAREA_HEIGHT}px`,
+                fontSize: '16px', // iOS에서 16px 미만일 때 자동 확대 방지
               }}
             />
           </div>
