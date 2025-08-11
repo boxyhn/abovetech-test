@@ -23,7 +23,7 @@ export default function ChatList({ messages, isTyping }: ChatListProps) {
   }, [messages, isTyping]);
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 my-2">
+    <div className="flex-1 overflow-y-auto px-4 my-2" role="log" aria-label="채팅 메시지 목록">
       {messages.map((message) => (
         <ChatMessage
           key={message.id}

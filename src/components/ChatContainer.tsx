@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import ChatList, { Message } from "./ChatList";
 import ChatInput from "./chat/ChatInput";
 import ChatHeader from "./chat/ChatHeader";
+import { generateMessageId } from "@/utils/idGenerator";
+import { validateMessage, processMessage } from "@/utils/messageValidation";
 
 export default function ChatContainer() {
   const [messages, setMessages] = useState<Message[]>([
@@ -35,9 +37,19 @@ export default function ChatContainer() {
   const [isTyping, setIsTyping] = useState(false);
 
   const handleSendMessage = (text: string) => {
+    // Validate message
+    const validation = validateMessage(text);
+    if (!validation.isValid) {
+      // TODO: Show error message to user
+      return;
+    }
+    
+    // Process and sanitize message
+    const processedText = processMessage(text);
+    
     const newMessage: Message = {
-      id: Date.now().toString(),
-      text,
+      id: generateMessageId(),
+      text: processedText,
       timestamp: new Date().toLocaleTimeString("ko-KR", {
         hour: "numeric",
         minute: "2-digit",
@@ -53,7 +65,7 @@ export default function ChatContainer() {
     setTimeout(() => {
       setIsTyping(false);
       const botMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: generateMessageId(),
         text: "메시지를 받았습니다. 곧 답변드리겠습니다.",
         timestamp: new Date().toLocaleTimeString("ko-KR", {
           hour: "numeric",
@@ -69,10 +81,11 @@ export default function ChatContainer() {
   return (
     <div className="flex flex-col h-screen">
       <ChatHeader
-        onBack={() => console.log("Go back")}
-        onReport={() => console.log("Report")}
+        onBack={() => {}} // TODO: 뒤로가기 핸들러 구현
+        onReport={() => {}} // TODO: 신고 핸들러 구현
         coin={24500}
       />
+      {/* TODO: 실제 타이핑 상태 연동 예정. 현재는 데모용으로 true 설정 */}
       <ChatList messages={messages} isTyping={true} />
       <ChatInput onSendMessage={handleSendMessage} />
     </div>

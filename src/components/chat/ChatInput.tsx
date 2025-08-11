@@ -50,7 +50,7 @@ export default function ChatInput({ onSendMessage }: ChatInputProps) {
   }, [handleSend]);
 
   const handlePlusClick = useCallback(() => {
-    console.log("plus");
+    // TODO: 파일 첨부 기능 구현
   }, []);
 
   // Styles

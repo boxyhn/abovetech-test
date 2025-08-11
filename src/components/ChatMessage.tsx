@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import TypingIndicator from "./TypingIndicator";
 
 interface ChatMessageProps {
@@ -8,7 +8,7 @@ interface ChatMessageProps {
   isTyping?: boolean;
 }
 
-export default function ChatMessage({
+const ChatMessage = memo(function ChatMessage({
   message,
   timestamp,
   isUser,
@@ -22,20 +22,24 @@ export default function ChatMessage({
     : "message-bubble-other";
 
   return (
-    <div className={`flex ${messageAlignClass}`}>
+    <article 
+      className={`flex ${messageAlignClass}`}
+      aria-label={isUser ? "내 메시지" : "호키동자 메시지"}
+    >
       <div
         className={`flex ${messageFlexClass} items-end gap-2 ${messageMarginClass}`}
       >
         <div className="flex flex-col gap-1">
           {!isUser && (
             <div className="flex items-center gap-1.5 drop-shadow-other-profile">
-              <div className="avatar-small bg-[#A6C3FA]" />
+              <div className="avatar-small bg-[#A6C3FA]" role="img" aria-label="호키동자 프로필" />
               <span className="text-label font-bold">호키동자</span>
             </div>
           )}
 
           <div
             className={`message-bubble ${messageBubbleClass}`}
+            role={isTyping ? "status" : "text"}
           >
             {isTyping ? (
               <>
@@ -52,10 +56,12 @@ export default function ChatMessage({
           </div>
         </div>
 
-        <span className="text-caption text-zendi-gray shrink-0">
+        <time className="text-caption text-zendi-gray shrink-0" dateTime={timestamp}>
           {timestamp}
-        </span>
+        </time>
       </div>
-    </div>
+    </article>
   );
-}
+});
+
+export default ChatMessage;
