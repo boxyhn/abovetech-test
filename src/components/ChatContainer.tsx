@@ -120,7 +120,7 @@ export default function ChatContainer() {
       // 에러 메시지 표시
       const errorMessage: Message = {
         id: generateMessageId(),
-        text: "메시지 전송에 실패했습니다. 다시 시도해주세요.",
+        text: "앗, 메시지가 안 보내져요... 😅 다시 한 번 말씀해주세요!",
         timestamp: new Date().toLocaleTimeString("ko-KR", {
           hour: "numeric",
           minute: "2-digit",
@@ -181,7 +181,7 @@ export default function ChatContainer() {
       />
       {chatState === "INITIALIZING" ? (
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-zendi-black30">세션을 초기화하는 중...</div>
+          <div className="text-zendi-black30">호키동자가 준비하고 있어요... 💪</div>
         </div>
       ) : (
         <>
@@ -189,9 +189,9 @@ export default function ChatContainer() {
             messages={messages}
             typingMessage={
               chatState === "ANALYZING"
-                ? "분석 중"
+                ? "열심히 분석하고 있어요"
                 : chatState === "WAITING_RESPONSE"
-                ? "생각 중"
+                ? "생각하고 있어요"
                 : undefined
             }
           />

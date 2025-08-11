@@ -1,5 +1,6 @@
 import React, { memo } from "react";
 import TypingIndicator from "./TypingIndicator";
+import Image from "next/image";
 
 interface ChatMessageProps {
   message: string;
@@ -22,7 +23,7 @@ const ChatMessage = memo(function ChatMessage({
     : "message-bubble-other";
 
   return (
-    <article 
+    <article
       className={`flex ${messageAlignClass}`}
       aria-label={isUser ? "내 메시지" : "호키동자 메시지"}
     >
@@ -32,7 +33,15 @@ const ChatMessage = memo(function ChatMessage({
         <div className="flex flex-col gap-1">
           {!isUser && (
             <div className="flex items-center gap-1.5 drop-shadow-other-profile">
-              <div className="avatar-small bg-[#A6C3FA]" role="img" aria-label="호키동자 프로필" />
+              <Image
+                src="/images/hokidongza.png"
+                alt="호키동자 프로필"
+                width={120}
+                height={120}
+                className="rounded-full avatar-small"
+                role="img"
+                aria-label="호키동자 프로필"
+              />
               <span className="text-label font-bold">호키동자</span>
             </div>
           )}
@@ -49,14 +58,15 @@ const ChatMessage = memo(function ChatMessage({
                 <TypingIndicator />
               </>
             ) : (
-              <p className="whitespace-pre-wrap text-body">
-                {message}
-              </p>
+              <p className="whitespace-pre-wrap text-body">{message}</p>
             )}
           </div>
         </div>
 
-        <time className="text-caption text-zendi-gray shrink-0" dateTime={timestamp}>
+        <time
+          className="text-caption text-zendi-gray shrink-0"
+          dateTime={timestamp}
+        >
           {timestamp}
         </time>
       </div>
