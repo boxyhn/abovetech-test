@@ -12,18 +12,22 @@ export interface Message {
 
 interface ChatListProps {
   messages: Message[];
-  isTyping?: boolean;
+  typingMessage?: string;
 }
 
-export default function ChatList({ messages, isTyping }: ChatListProps) {
+export default function ChatList({ messages, typingMessage }: ChatListProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isTyping]);
+  }, [messages, typingMessage]);
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 my-2" role="log" aria-label="채팅 메시지 목록">
+    <div
+      className="flex-1 overflow-y-auto px-4 mt-2"
+      role="log"
+      aria-label="채팅 메시지 목록"
+    >
       {messages.map((message) => (
         <ChatMessage
           key={message.id}
@@ -33,10 +37,14 @@ export default function ChatList({ messages, isTyping }: ChatListProps) {
         />
       ))}
 
-      {isTyping && (
+      {typingMessage && (
         <ChatMessage
-          message="생각 중"
-          timestamp="오후 2:21"
+          message={typingMessage}
+          timestamp={new Date().toLocaleTimeString("ko-KR", {
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+          })}
           isUser={false}
           isTyping={true}
         />

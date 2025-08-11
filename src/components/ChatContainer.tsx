@@ -1,53 +1,74 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ChatList, { Message } from "./ChatList";
 import ChatInput from "./chat/ChatInput";
 import ChatHeader from "./chat/ChatHeader";
 import { generateMessageId } from "@/utils/idGenerator";
 import { validateMessage, processMessage } from "@/utils/messageValidation";
+import { ApiClient } from "@/lib/api";
+
+type ChatState =
+  | "INITIALIZING"      // 세션 초기화 중
+  | "IDLE"              // 대기 중 (메시지 전송 가능)
+  | "WAITING_RESPONSE"  // 응답 대기 중
+  | "ANALYZING";        // 사주 분석 중
 
 export default function ChatContainer() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      text: "안녕! 내가 해준 상담이 마음에 들었어?\n추가로 궁금한 점이 있으면 무엇이든 물어봐.\n상담을 해쳤던 내용을 바탕으로 고민을 더 심도있게 다뤄볼게!",
-      timestamp: "오후 2:21",
-      isUser: false,
-    },
-    {
-      id: "2",
-      text: "나는 내 미래 남자친구가 궁금해.\n언제 어디서 만날 수 있을 지 자세히 설명해봐.",
-      timestamp: "오후 2:21",
-      isUser: true,
-    },
-    {
-      id: "3",
-      text: "안녕! 내가 해준 상담이 마음에 들었어?\n추가로 궁금한 점이 있으면 무엇이든 물어봐.\n상담을 해쳤던 내용을 바탕으로 고민을 더 심도있게 다뤄볼게!",
-      timestamp: "오후 2:21",
-      isUser: false,
-    },
-    {
-      id: "4",
-      text: "나는 내 미래 남자친구가 궁금해.\n언제 어디서 만날 수 있을 지 자세히 설명해봐.",
-      timestamp: "오후 2:21",
-      isUser: true,
-    },
-  ]);
-  const [isTyping, setIsTyping] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [chatState, setChatState] = useState<ChatState>("INITIALIZING");
 
-  const handleSendMessage = (text: string) => {
+  // 세션 초기화
+  useEffect(() => {
+    const initializeSession = async () => {
+      try {
+        const response = await ApiClient.createSession();
+        setSessionId(response.session_id);
+
+        // 첫 인사말 추가
+        const initialMessage: Message = {
+          id: generateMessageId(),
+          text: response.initial_message,
+          timestamp: new Date().toLocaleTimeString("ko-KR", {
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+          }),
+          isUser: false,
+        };
+        setMessages([initialMessage]);
+        setChatState("IDLE");
+      } catch (error) {
+        console.error("Failed to create session:", error);
+      }
+    };
+
+    initializeSession();
+  }, []);
+
+  const handleSendMessage = async (text: string) => {
+    // 응답 대기 중이거나 분석 중이면 전송 방지
+    if (chatState === "WAITING_RESPONSE" || chatState === "ANALYZING") {
+      return;
+    }
+
     // Validate message
     const validation = validateMessage(text);
     if (!validation.isValid) {
-      // TODO: Show error message to user
       return;
     }
-    
+
+    if (!sessionId) {
+      console.error("No session ID available");
+      return;
+    }
+
     // Process and sanitize message
     const processedText = processMessage(text);
-    
-    const newMessage: Message = {
+
+    // 사용자 메시지 즉시 표시
+    const userMessage: Message = {
       id: generateMessageId(),
       text: processedText,
       timestamp: new Date().toLocaleTimeString("ko-KR", {
@@ -57,16 +78,30 @@ export default function ChatContainer() {
       }),
       isUser: true,
     };
+    setMessages((prev) => [...prev, userMessage]);
 
-    setMessages((prev) => [...prev, newMessage]);
+    // 응답 대기 상태로 변경
+    setChatState("WAITING_RESPONSE");
 
-    // 타이핑 인디케이터 시뮬레이션
-    setIsTyping(true);
-    setTimeout(() => {
-      setIsTyping(false);
+    try {
+      // API 호출
+      const response = await ApiClient.sendMessage({
+        session_id: sessionId,
+        message: processedText,
+      });
+
+      // 상태 업데이트
+      if (response.status === "ANALYZING") {
+        setChatState("ANALYZING");
+      } else {
+        // 응답 받았으면 IDLE 상태로
+        setChatState("IDLE");
+      }
+
+      // 봇 응답 추가
       const botMessage: Message = {
         id: generateMessageId(),
-        text: "메시지를 받았습니다. 곧 답변드리겠습니다.",
+        text: response.response,
         timestamp: new Date().toLocaleTimeString("ko-KR", {
           hour: "numeric",
           minute: "2-digit",
@@ -75,7 +110,66 @@ export default function ChatContainer() {
         isUser: false,
       };
       setMessages((prev) => [...prev, botMessage]);
-    }, 2000);
+
+      // ANALYZING 상태일 때 폴링 시작
+      if (response.status === "ANALYZING") {
+        startPollingForAnalysis();
+      }
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      // 에러 메시지 표시
+      const errorMessage: Message = {
+        id: generateMessageId(),
+        text: "메시지 전송에 실패했습니다. 다시 시도해주세요.",
+        timestamp: new Date().toLocaleTimeString("ko-KR", {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        }),
+        isUser: false,
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+      // 에러 시 IDLE 상태로 복원
+      setChatState("IDLE");
+    }
+  };
+
+  // 분석 완료 폴링
+  const startPollingForAnalysis = () => {
+    const checkInterval = setInterval(async () => {
+      if (!sessionId) return;
+
+      try {
+        // 세션 상태 확인 API 호출
+        const response = await ApiClient.getSessionStatus(sessionId);
+
+        if (response.status !== "ANALYZING") {
+          clearInterval(checkInterval);
+          setChatState("IDLE");
+
+          // 분석 완료 메시지가 있으면 추가
+          if (
+            response.latestMessage &&
+            !messages.some((m) => m.text === response.latestMessage)
+          ) {
+            const readyMessage: Message = {
+              id: generateMessageId(),
+              text: response.latestMessage,
+              timestamp: new Date().toLocaleTimeString("ko-KR", {
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true,
+              }),
+              isUser: false,
+            };
+            setMessages((prev) => [...prev, readyMessage]);
+          }
+        }
+      } catch (error) {
+        console.error("Polling error:", error);
+        clearInterval(checkInterval);
+      }
+    }, 3000); // 3초마다 확인
   };
 
   return (
@@ -85,9 +179,30 @@ export default function ChatContainer() {
         onReport={() => {}} // TODO: 신고 핸들러 구현
         coin={24500}
       />
-      {/* TODO: 실제 타이핑 상태 연동 예정. 현재는 데모용으로 true 설정 */}
-      <ChatList messages={messages} isTyping={true} />
-      <ChatInput onSendMessage={handleSendMessage} />
+      {chatState === "INITIALIZING" ? (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-zendi-black30">세션을 초기화하는 중...</div>
+        </div>
+      ) : (
+        <>
+          <ChatList
+            messages={messages}
+            typingMessage={
+              chatState === "ANALYZING"
+                ? "분석 중"
+                : chatState === "WAITING_RESPONSE"
+                ? "생각 중"
+                : undefined
+            }
+          />
+          <ChatInput
+            onSendMessage={handleSendMessage}
+            disabled={
+              chatState === "WAITING_RESPONSE" || chatState === "ANALYZING"
+            }
+          />
+        </>
+      )}
     </div>
   );
 }

@@ -21,7 +21,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${pretendard.variable} antialiased`}>
+      {/* suppressHydrationWarning: ColorZilla 등 브라우저 확장이 추가하는 속성으로 인한 hydration 경고 방지 */}
+      <body className={`${pretendard.variable} antialiased`} suppressHydrationWarning>
         <MobileLayout>{children}</MobileLayout>
       </body>
     </html>

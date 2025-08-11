@@ -17,9 +17,15 @@ const ICON_SIZE = {
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
+  disabled?: boolean;
+  placeholder?: string;
 }
 
-export default function ChatInput({ onSendMessage }: ChatInputProps) {
+export default function ChatInput({
+  onSendMessage,
+  disabled = false,
+  placeholder = "호키에게 메세지를 보내보세요",
+}: ChatInputProps) {
   const [message, setMessage] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -36,18 +42,23 @@ export default function ChatInput({ onSendMessage }: ChatInputProps) {
   const isMessageEmpty = message.trim() === "";
 
   const handleSend = useCallback(() => {
-    if (!isMessageEmpty) {
+    if (!isMessageEmpty && !disabled) {
       onSendMessage(message);
       setMessage("");
     }
-  }, [isMessageEmpty, message, onSendMessage]);
+  }, [isMessageEmpty, message, onSendMessage, disabled]);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  }, [handleSend]);
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        if (!disabled) {
+          handleSend();
+        }
+      }
+    },
+    [handleSend, disabled]
+  );
 
   const handlePlusClick = useCallback(() => {
     // TODO: 파일 첨부 기능 구현
@@ -66,7 +77,7 @@ export default function ChatInput({ onSendMessage }: ChatInputProps) {
   return (
     <>
       {/* Input 영역 밑으로 화면이 내려가지 않도록 빈 공간 추가 */}
-      <div className="h-[70px]" />
+      <div className="h-[65px]" />
 
       <div className={wrapperClasses}>
         {/* Background layer */}
@@ -92,7 +103,7 @@ export default function ChatInput({ onSendMessage }: ChatInputProps) {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="호키에게 메세지를 보내보세요"
+              placeholder={placeholder}
               className={textareaClasses}
               rows={1}
               style={{
@@ -106,12 +117,16 @@ export default function ChatInput({ onSendMessage }: ChatInputProps) {
           <ChatInputButton
             onClick={handleSend}
             variant="send"
-            className={!isMessageEmpty ? "bg-zendi-blue" : ""}
-            disabled={isMessageEmpty}
+            className={
+              !isMessageEmpty && !disabled ? "bg-zendi-blue" : "bg-transparent"
+            }
+            disabled={isMessageEmpty || disabled}
             aria-label="Send message"
           >
             <SendIcon
-              color={!isMessageEmpty ? "white" : colors.zendiBlack30}
+              color={
+                !isMessageEmpty && !disabled ? "white" : colors.zendiBlack30
+              }
               size={ICON_SIZE.send}
             />
           </ChatInputButton>
