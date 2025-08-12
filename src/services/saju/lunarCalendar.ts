@@ -333,19 +333,28 @@ export class LunarCalendarService {
 
   /**
    * 현재 세운 계산
+   * @param longitude 경도 (기본값: 서울)
    */
-  async calculateCurrentSeun(): Promise<{ year: number; ganji: string }> {
+  async calculateCurrentSeun(longitude: number = 126.9778): Promise<{ year: number; ganji: string }> {
     const now = new Date();
+    
+    // 현재 시간도 보정 필요 (서머타임 + 진태양시)
+    const { adjustTimeForLocation } = await import('./utils/timeUtils');
+    const adjustedNow = adjustTimeForLocation(now, longitude, {
+      applySummerTime: true,
+      useEquationOfTime: true
+    });
+    
     const yearPillar = await this.calculateYearPillar(
-      now.getFullYear(),
-      now.getMonth() + 1,
-      now.getDate(),
-      now.getHours(),
-      now.getMinutes()
+      adjustedNow.getFullYear(),
+      adjustedNow.getMonth() + 1,
+      adjustedNow.getDate(),
+      adjustedNow.getHours(),
+      adjustedNow.getMinutes()
     );
 
     return {
-      year: now.getFullYear(),
+      year: adjustedNow.getFullYear(),
       ganji: yearPillar,
     };
   }

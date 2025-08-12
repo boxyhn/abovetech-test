@@ -91,8 +91,8 @@ export async function calculateSajuAnalysis(input: SajuInputObject): Promise<Saj
       calculationOptions
     );
 
-    // 8. 현재 세운 계산
-    const seun = await lunarCalendar.calculateCurrentSeun();
+    // 8. 현재 세운 계산 (보정된 경도 사용)
+    const seun = await lunarCalendar.calculateCurrentSeun(input.longitude || 126.9778);
 
     // 9. 기본 정보 구성
     const basicInfo: BasicInfo = {
