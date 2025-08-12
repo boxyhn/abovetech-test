@@ -14,6 +14,7 @@ import { UnseongAnalyzer } from './unseongAnalyzer';
 import { ShinsalAnalyzer } from './shinsalAnalyzer';
 import { InteractionAnalyzer } from './interactionAnalyzer';
 import { AdvancedAnalyzer } from './advancedAnalyzer';
+import { adjustTimeForLocation } from './utils/timeUtils';
 
 /**
  * 사주 분석 통합 함수
@@ -27,7 +28,24 @@ export async function calculateSajuAnalysis(input: SajuInputObject): Promise<Saj
     // 2. 날짜 파싱
     const { year, month, day, hour, minute } = parseDateTime(input.birth_date, input.birth_time);
 
-    // 3. 서비스 인스턴스 생성
+    // 3. 시간 보정 (서머타임 + 진태양시) - 서울 기준 또는 입력된 경도
+    const adjustedDate = adjustTimeForLocation(
+      new Date(year, month - 1, day, hour, minute),
+      input.longitude || 126.9778,  // 서울 기본값
+      {
+        applySummerTime: true,
+        useEquationOfTime: true
+      }
+    );
+
+    // 보정된 시간 추출
+    const adjustedYear = adjustedDate.getFullYear();
+    const adjustedMonth = adjustedDate.getMonth() + 1;
+    const adjustedDay = adjustedDate.getDate();
+    const adjustedHour = adjustedDate.getHours();
+    const adjustedMinute = adjustedDate.getMinutes();
+
+    // 4. 서비스 인스턴스 생성
     const lunarCalendar = new LunarCalendarService();
     const daeunCalculator = new DaeunCalculator();
     const ohaengAnalyzer = new OhaengAnalyzer();
@@ -37,20 +55,21 @@ export async function calculateSajuAnalysis(input: SajuInputObject): Promise<Saj
     const interactionAnalyzer = new InteractionAnalyzer();
     const advancedAnalyzer = new AdvancedAnalyzer();
 
-    // 4. 사주팔자 계산
+    // 5. 사주팔자 계산 (보정된 시간 사용)
     const sajuPalja = await lunarCalendar.calculateSajuPalja(
-      year,
-      month,
-      day,
-      hour,
-      minute,
-      input.is_lunar
+      adjustedYear,
+      adjustedMonth,
+      adjustedDay,
+      adjustedHour,
+      adjustedMinute,
+      input.is_lunar,
+      true  // 이미 보정됨
     );
 
-    // 5. 일간 추출
+    // 6. 일간 추출
     const ilgan = sajuPalja.day_pillar[0];
 
-    // 6. 대운 계산 (고정밀 옵션 포함)
+    // 7. 대운 계산 (고정밀 옵션 포함, 보정된 시간 사용)
     const calculationOptions = {
       longitude: input.longitude || 126.9778,  // 서울 기본값
       latitude: input.latitude || 37.5665,
@@ -58,24 +77,24 @@ export async function calculateSajuAnalysis(input: SajuInputObject): Promise<Saj
       termType: 'both' as const,  // 절기와 중기 모두 사용
       ageSystem: 'korean' as const,
       precision: 'hour' as const,  // 시간 단위 정밀도
-      useEquationOfTime: true
+      useEquationOfTime: false  // 이미 보정됨
     };
     
     const daeun = await daeunCalculator.calculateDaeun(
       sajuPalja,
       input.gender,
-      year,
-      month,
-      day,
-      hour,
-      minute,
+      adjustedYear,
+      adjustedMonth,
+      adjustedDay,
+      adjustedHour,
+      adjustedMinute,
       calculationOptions
     );
 
-    // 7. 현재 세운 계산
+    // 8. 현재 세운 계산
     const seun = await lunarCalendar.calculateCurrentSeun();
 
-    // 8. 기본 정보 구성
+    // 9. 기본 정보 구성
     const basicInfo: BasicInfo = {
       saju_palja: sajuPalja,
       ilgan,
@@ -83,7 +102,7 @@ export async function calculateSajuAnalysis(input: SajuInputObject): Promise<Saj
       seun
     };
 
-    // 9. 1차 분석 수행
+    // 10. 1차 분석 수행
     // 오행 분포 계산
     const ohaengDistribution = ohaengAnalyzer.calculateOhaengDistribution(sajuPalja, true);
     
@@ -107,7 +126,7 @@ export async function calculateSajuAnalysis(input: SajuInputObject): Promise<Saj
       interactions
     };
 
-    // 10. 심층 분석 수행
+    // 11. 심층 분석 수행
     const inDepthAnalysis: InDepthAnalysis = advancedAnalyzer.performInDepthAnalysis(
       sajuPalja,
       ilgan,
@@ -115,7 +134,7 @@ export async function calculateSajuAnalysis(input: SajuInputObject): Promise<Saj
       ohaengDistribution
     );
 
-    // 11. 최종 결과 조립
+    // 12. 최종 결과 조립
     const result: SajuAnalysisObject = {
       basic_info: basicInfo,
       primary_analysis: primaryAnalysis,

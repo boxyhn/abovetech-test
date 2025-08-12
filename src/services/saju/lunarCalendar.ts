@@ -7,10 +7,7 @@ import {
   HeavenlyStem,
 } from "./types";
 import { SolarTermsAPIService } from "./solarTermsAPI";
-import { 
-  adjustTimeComponents,
-  mod 
-} from "./utils/timeUtils";
+import { mod } from "./utils/timeUtils";
 
 export class LunarCalendarService {
   private calendar: KoreanLunarCalendar;
@@ -74,7 +71,8 @@ export class LunarCalendarService {
     day: number,
     hour: number,
     minute: number,
-    isLunar: boolean = false
+    isLunar: boolean = false,
+    isAlreadyAdjusted: boolean = false
   ): Promise<SajuPalja> {
     // 음력인 경우 양력으로 변환
     let solarDate = { year, month, day };
@@ -82,21 +80,29 @@ export class LunarCalendarService {
       solarDate = this.lunarToSolar(year, month, day);
     }
 
-    // 서머타임 및 진태양시 보정 (서울 기준)
-    const adjustedTime = adjustTimeComponents(
-      solarDate.year,
-      solarDate.month,
-      solarDate.day,
-      hour,
-      minute
-    );
+    let adjustedYear = solarDate.year;
+    let adjustedMonth = solarDate.month;
+    let adjustedDay = solarDate.day;
+    let adjustedHour = hour;
+    let adjustedMinute = minute;
 
-    // 보정된 시간으로 계산
-    const adjustedYear = adjustedTime.year;
-    const adjustedMonth = adjustedTime.month;
-    const adjustedDay = adjustedTime.day;
-    const adjustedHour = adjustedTime.hour;
-    const adjustedMinute = adjustedTime.minute;
+    // 이미 보정되지 않은 경우에만 보정 적용
+    if (!isAlreadyAdjusted) {
+      const { adjustTimeComponents } = await import('./utils/timeUtils');
+      const adjustedTime = adjustTimeComponents(
+        solarDate.year,
+        solarDate.month,
+        solarDate.day,
+        hour,
+        minute
+      );
+
+      adjustedYear = adjustedTime.year;
+      adjustedMonth = adjustedTime.month;
+      adjustedDay = adjustedTime.day;
+      adjustedHour = adjustedTime.hour;
+      adjustedMinute = adjustedTime.minute;
+    }
 
     // 년주 계산 (입춘 시각 고려)
     const yearPillar = await this.calculateYearPillar(
