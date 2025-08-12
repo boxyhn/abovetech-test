@@ -78,6 +78,56 @@ export class SessionRepository extends BaseRepository {
     return true
   }
 
+  /**
+   * 사주 분석 데이터 저장
+   */
+  async saveSajuAnalysis(
+    id: string,
+    sajuAnalysis: Record<string, unknown>,
+    birthLunarDate?: string,
+    isLunarInput: boolean = false
+  ): Promise<boolean> {
+    const updateData: Record<string, unknown> = {
+      saju_analysis: sajuAnalysis
+    }
+
+    if (birthLunarDate) {
+      updateData.birth_lunar_date = birthLunarDate
+    }
+
+    updateData.is_lunar_input = isLunarInput
+
+    const { error } = await supabase
+      .from('sessions')
+      .update(updateData)
+      .eq('id', id)
+
+    if (error) {
+      this.handleError('saveSajuAnalysis', error)
+      return false
+    }
+
+    return true
+  }
+
+  /**
+   * 사주 분석 데이터 조회
+   */
+  async getSajuAnalysis(id: string): Promise<Record<string, unknown> | null> {
+    const { data, error } = await supabase
+      .from('sessions')
+      .select('saju_analysis')
+      .eq('id', id)
+      .single()
+
+    if (error) {
+      this.handleError('getSajuAnalysis', error)
+      return null
+    }
+
+    return data?.saju_analysis || null
+  }
+
 }
 
 export const sessionRepository = new SessionRepository()
