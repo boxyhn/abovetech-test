@@ -6,14 +6,10 @@ import {
   EARTHLY_BRANCHES,
   CalculationOptions 
 } from "./types";
-import { 
-  adjustTimeForLocation,
-  calculatePreciseDaeunAge,
-  convertAge
-} from "./utils/timeUtils";
+import { MONTH_START_TERMS, SOLAR_TERM_DATES } from "@/constants/solarTerms";
+import { calculatePreciseDaeunAge, convertAge } from "./utils/timeUtils";
 
 export class DaeunCalculator {
-
   /**
    * 대운 계산 (고정밀 버전)
    * @param sajuPalja 사주팔자
@@ -112,104 +108,113 @@ export class DaeunCalculator {
     options: CalculationOptions
   ): Promise<number> {
     // 생일 날짜 객체 (정확한 시간 포함)
-    let birthDate = new Date(birthYear, birthMonth - 1, birthDay, birthHour, birthMinute);
-    
-    // 진태양시 보정 적용
-    if (options.longitude !== undefined) {
-      birthDate = adjustTimeForLocation(birthDate, options.longitude, {
-        applySummerTime: false, // 생일 날짜에는 서머타임 미적용 (이미 표준시)
-        useEquationOfTime: options.useEquationOfTime
-      });
-    }
-
-    // 2004년 이후면 API 사용, 이전이면 기본 계산
-    const yearSolarTerms = new Map<string, Date>();
-    const nextYearSolarTerms = new Map<string, Date>();
-    const prevYearSolarTerms = new Map<string, Date>();
-    
-    if (birthYear > 2004) {
-      // API를 통한 절기 정보 조회
-      const { SolarTermsAPIService, convertSolarTermToDate } = await import("./solarTermsAPI");
-      const solarTermsAPI = new SolarTermsAPIService();
-      
-      // 연도별 절기 데이터 가져오기
-      const currentYearData = await solarTermsAPI.getYearlySolarTerms(birthYear);
-      const prevYearData = await solarTermsAPI.getYearlySolarTerms(birthYear - 1);
-      const nextYearData = await solarTermsAPI.getYearlySolarTerms(birthYear + 1);
-      
-      // Map으로 변환
-      currentYearData.forEach(term => {
-        yearSolarTerms.set(term.dateName, convertSolarTermToDate(term));
-      });
-      
-      prevYearData.forEach(term => {
-        prevYearSolarTerms.set(term.dateName, convertSolarTermToDate(term));
-      });
-      
-      nextYearData.forEach(term => {
-        nextYearSolarTerms.set(term.dateName, convertSolarTermToDate(term));
-      });
-    }
-
-    // 24절기 모두 포함 (절기와 중기)
-    const allSolarTerms = [
-      "입춘",
-      "우수",
-      "경칩",
-      "춘분",
-      "청명",
-      "곡우",
-      "입하",
-      "소만",
-      "망종",
-      "하지",
-      "소서",
-      "대서",
-      "입추",
-      "처서",
-      "백로",
-      "추분",
-      "한로",
-      "상강",
-      "입동",
-      "소설",
-      "대설",
-      "동지",
-      "소한",
-      "대한",
-    ];
+    // 이미 calculateSajuAnalysis에서 보정된 값을 받음
+    const birthDate = new Date(
+      birthYear,
+      birthMonth - 1,
+      birthDay,
+      birthHour,
+      birthMinute
+    );
 
     // 모든 절기 날짜를 수집
     const allTermDates: { name: string; date: Date }[] = [];
 
-    // 이전 연도 절기 (12월 절기들)
-    for (const termName of ["소한", "대한"]) {
-      const date = prevYearSolarTerms.get(termName);
-      if (date) {
-        allTermDates.push({ name: termName, date });
-      }
-    }
+    // 2004년 이후면 API 사용, 이전이면 근사값 사용
+    if (birthYear > 2004) {
+      // API를 통한 절기 정보 조회
+      const { SolarTermsAPIService, convertSolarTermToDate } = await import(
+        "./solarTermsAPI"
+      );
+      const solarTermsAPI = new SolarTermsAPIService();
 
-    // 현재 연도 절기
-    for (const termName of allSolarTerms) {
-      const date = yearSolarTerms.get(termName);
-      if (date) {
-        allTermDates.push({ name: termName, date });
-      }
-    }
+      // 연도별 절기 데이터 가져오기
+      const currentYearData = await solarTermsAPI.getYearlySolarTerms(
+        birthYear
+      );
+      const prevYearData = await solarTermsAPI.getYearlySolarTerms(
+        birthYear - 1
+      );
+      const nextYearData = await solarTermsAPI.getYearlySolarTerms(
+        birthYear + 1
+      );
 
-    // 다음 연도 절기 (1월 절기들)
-    for (const termName of ["소한", "대한", "입춘", "우수"]) {
-      const date = nextYearSolarTerms.get(termName);
-      if (date) {
-        allTermDates.push({ name: termName, date });
+      // 전년도 12월 절(節) - 대설, 소한만 포함 (대운 계산에 사용)
+      prevYearData
+        .filter(
+          (term) => ["대설", "소한"].includes(term.dateName) // 절만
+        )
+        .forEach((term) => {
+          allTermDates.push({
+            name: term.dateName,
+            date: convertSolarTermToDate(term),
+          });
+        });
+
+      // 현재년도 절(節)만 포함 - 월의 시작 절기만 사용
+      currentYearData
+        .filter((term) =>
+          MONTH_START_TERMS.includes(
+            term.dateName as (typeof MONTH_START_TERMS)[number]
+          )
+        )
+        .forEach((term) => {
+          allTermDates.push({
+            name: term.dateName,
+            date: convertSolarTermToDate(term),
+          });
+        });
+
+      // 다음년도 1-2월 절(節) - 소한, 입춘, 경칩만 포함
+      nextYearData
+        .filter(
+          (term) => ["소한", "입춘", "경칩"].includes(term.dateName) // 절만
+        )
+        .forEach((term) => {
+          allTermDates.push({
+            name: term.dateName,
+            date: convertSolarTermToDate(term),
+          });
+        });
+    } else {
+      // 2004년 이전: 근사값 사용
+      // 전년도 12월 절(節) - 대설만 포함
+      const prevYear = birthYear - 1;
+      allTermDates.push({ name: "대설", date: new Date(prevYear, 11, 7) });
+
+      // 현재년도 절(節)만 포함 - 각 월의 첫 번째 절기만
+      for (let month = 1; month <= 12; month++) {
+        const monthTerms = SOLAR_TERM_DATES[month];
+        if (monthTerms && monthTerms.length > 0) {
+          // 각 월의 첫 번째 절기만 (절)
+          const firstTerm = monthTerms[0];
+          if (
+            MONTH_START_TERMS.includes(
+              firstTerm.term as (typeof MONTH_START_TERMS)[number]
+            )
+          ) {
+            allTermDates.push({
+              name: firstTerm.term,
+              date: new Date(birthYear, month - 1, firstTerm.day),
+            });
+          }
+        }
       }
+
+      // 다음년도 1-3월 절(節) - 소한, 입춘, 경칩만 포함
+      const nextYear = birthYear + 1;
+      allTermDates.push(
+        { name: "소한", date: new Date(nextYear, 0, 5) },
+        { name: "입춘", date: new Date(nextYear, 1, 4) },
+        { name: "경칩", date: new Date(nextYear, 2, 6) }
+      );
     }
 
     // 날짜순으로 정렬
     allTermDates.sort((a, b) => a.date.getTime() - b.date.getTime());
 
     let daysFromTerm: number = 0;
+    let foundTerm = false;
 
     if (isForward) {
       // 순행: 생일 이후 가장 가까운 절기까지의 날짜
@@ -218,6 +223,7 @@ export class DaeunCalculator {
           daysFromTerm = Math.floor(
             (term.date.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24)
           );
+          foundTerm = true;
           break;
         }
       }
@@ -229,44 +235,50 @@ export class DaeunCalculator {
             (birthDate.getTime() - allTermDates[i].date.getTime()) /
               (1000 * 60 * 60 * 24)
           );
+          foundTerm = true;
           break;
         }
       }
     }
 
+    // 절기를 찾지 못한 경우 기본값 사용
+    if (!foundTerm) {
+      daysFromTerm = 15; // 기본값: 15일 (약 5세)
+    }
+
     // 정밀도에 따른 날짜/시간 차이 계산
     let timeDiff: number = 0;
-    
-    if (options.precision === 'minute' || options.precision === 'hour') {
+
+    if (options.precision === "minute" || options.precision === "hour") {
       // 시간 단위 정밀 계산
       if (isForward) {
-        const nextTerm = allTermDates.find(t => t.date > birthDate);
+        const nextTerm = allTermDates.find((t) => t.date > birthDate);
         if (nextTerm) {
           timeDiff = nextTerm.date.getTime() - birthDate.getTime();
         }
       } else {
-        const prevTerm = [...allTermDates].reverse().find(t => t.date <= birthDate);
+        const prevTerm = [...allTermDates]
+          .reverse()
+          .find((t) => t.date <= birthDate);
         if (prevTerm) {
           timeDiff = birthDate.getTime() - prevTerm.date.getTime();
         }
       }
-      
+
       // 시간을 일수로 변환 (소수점 포함)
       daysFromTerm = timeDiff / (1000 * 60 * 60 * 24);
     }
-    
+
     // 계산 방식에 따른 대운수 계산
     const daeunStartAge = calculatePreciseDaeunAge(
       daysFromTerm,
-      options.calculationMethod || 'traditional'
+      options.calculationMethod || "traditional"
     );
-    
+
     // 나이 체계 변환
-    const finalAge = convertAge(
-      daeunStartAge,
-      options.ageSystem || 'korean'
-    );
-    
+    const finalAge = convertAge(daeunStartAge, options.ageSystem || "korean");
+
+    console.log(finalAge);
     // 최소 1세, 최대 10세로 제한
     return Math.max(1, Math.min(10, finalAge));
   }
