@@ -129,45 +129,6 @@ export class OhaengAnalyzer {
   }
 
   /**
-   * 오행 균형 분석
-   */
-  analyzeBalance(distribution: OhaengDistribution): {
-    strongest: string;
-    weakest: string;
-    isBalanced: boolean;
-    missingElements: string[];
-  } {
-    const elements = [
-      { name: 'wood', value: distribution.wood },
-      { name: 'fire', value: distribution.fire },
-      { name: 'earth', value: distribution.earth },
-      { name: 'metal', value: distribution.metal },
-      { name: 'water', value: distribution.water }
-    ];
-
-    // 가장 강한/약한 오행 찾기
-    elements.sort((a, b) => b.value - a.value);
-    const strongest = elements[0].name;
-    const weakest = elements[4].name;
-
-    // 없는 오행 찾기
-    const missingElements = elements
-      .filter(e => e.value === 0)
-      .map(e => e.name);
-
-    // 균형 여부 판단 (모든 오행이 1 이상이고, 차이가 3 이하)
-    const maxDiff = elements[0].value - elements[4].value;
-    const isBalanced = missingElements.length === 0 && maxDiff <= 3;
-
-    return {
-      strongest,
-      weakest,
-      isBalanced,
-      missingElements
-    };
-  }
-
-  /**
    * 일간의 오행 반환
    */
   getIlganElement(ilgan: string): FiveElements {

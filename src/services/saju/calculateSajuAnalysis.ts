@@ -3,8 +3,7 @@ import {
   SajuInputObject,
   SajuAnalysisObject,
   BasicInfo,
-  PrimaryAnalysis,
-  InDepthAnalysis
+  PrimaryAnalysis
 } from './types';
 import { LunarCalendarService } from './lunarCalendar';
 import { DaeunCalculator } from './daeunCalculator';
@@ -13,7 +12,6 @@ import { SipseongAnalyzer } from './sipseongAnalyzer';
 import { UnseongAnalyzer } from './unseongAnalyzer';
 import { ShinsalAnalyzer } from './shinsalAnalyzer';
 import { InteractionAnalyzer } from './interactionAnalyzer';
-import { AdvancedAnalyzer } from './advancedAnalyzer';
 import { adjustTimeForLocation } from './utils/timeUtils';
 
 /**
@@ -53,7 +51,6 @@ export async function calculateSajuAnalysis(input: SajuInputObject): Promise<Saj
     const unseongAnalyzer = new UnseongAnalyzer();
     const shinsalAnalyzer = new ShinsalAnalyzer();
     const interactionAnalyzer = new InteractionAnalyzer();
-    const advancedAnalyzer = new AdvancedAnalyzer();
 
     // 5. 사주팔자 계산 (보정된 시간 사용)
     const sajuPalja = await lunarCalendar.calculateSajuPalja(
@@ -126,19 +123,10 @@ export async function calculateSajuAnalysis(input: SajuInputObject): Promise<Saj
       interactions
     };
 
-    // 11. 심층 분석 수행
-    const inDepthAnalysis: InDepthAnalysis = advancedAnalyzer.performInDepthAnalysis(
-      sajuPalja,
-      ilgan,
-      sipseongMap,
-      ohaengDistribution
-    );
-
-    // 12. 최종 결과 조립
+    // 11. 최종 결과 조립
     const result: SajuAnalysisObject = {
       basic_info: basicInfo,
-      primary_analysis: primaryAnalysis,
-      in_depth_analysis: inDepthAnalysis
+      primary_analysis: primaryAnalysis
     };
 
     return result;
@@ -237,7 +225,7 @@ function parseDateTime(dateString: string, timeString: string): {
  * 사주 분석 결과를 읽기 쉬운 텍스트로 변환
  */
 export function formatSajuAnalysisForDisplay(analysis: SajuAnalysisObject): string {
-  const { basic_info, primary_analysis, in_depth_analysis } = analysis;
+  const { basic_info, primary_analysis } = analysis;
   
   let result = '=== 사주 분석 결과 ===\n\n';
   
@@ -309,14 +297,6 @@ export function formatSajuAnalysisForDisplay(analysis: SajuAnalysisObject): stri
   if (primary_analysis.interactions.hae.length > 0) {
     result += `해: ${primary_analysis.interactions.hae.join(', ')}\n`;
   }
-  result += '\n';
-  
-  // 심층 분석
-  result += '【심층 분석】\n';
-  result += `격국: ${in_depth_analysis.gyeokguk}\n`;
-  result += `용신: ${in_depth_analysis.yongsin}\n`;
-  result += `희신: ${in_depth_analysis.huisin}\n`;
-  result += `기신: ${in_depth_analysis.gisin}\n`;
   
   return result;
 }

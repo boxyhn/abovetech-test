@@ -8,4 +8,3 @@ export { SipseongAnalyzer } from './sipseongAnalyzer';
 export { UnseongAnalyzer } from './unseongAnalyzer';
 export { ShinsalAnalyzer } from './shinsalAnalyzer';
 export { InteractionAnalyzer } from './interactionAnalyzer';
-export { AdvancedAnalyzer } from './advancedAnalyzer';

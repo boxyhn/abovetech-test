@@ -96,104 +96,33 @@ export class SipseongAnalyzer {
     source: FiveElements,
     target: FiveElements
   ): 'same' | 'generate' | 'control' | 'controlled' | 'generated' {
-    if (source === target) return 'same';
+    if (source === target) return "same";
 
     // 오행 상생 관계
     const generationMap: Record<FiveElements, FiveElements> = {
-      [FiveElements.WOOD]: FiveElements.FIRE,   // 목생화
-      [FiveElements.FIRE]: FiveElements.EARTH,  // 화생토
+      [FiveElements.WOOD]: FiveElements.FIRE, // 목생화
+      [FiveElements.FIRE]: FiveElements.EARTH, // 화생토
       [FiveElements.EARTH]: FiveElements.METAL, // 토생금
       [FiveElements.METAL]: FiveElements.WATER, // 금생수
-      [FiveElements.WATER]: FiveElements.WOOD   // 수생목
+      [FiveElements.WATER]: FiveElements.WOOD, // 수생목
     };
 
     // 오행 상극 관계
     const controlMap: Record<FiveElements, FiveElements> = {
-      [FiveElements.WOOD]: FiveElements.EARTH,  // 목극토
+      [FiveElements.WOOD]: FiveElements.EARTH, // 목극토
       [FiveElements.EARTH]: FiveElements.WATER, // 토극수
-      [FiveElements.WATER]: FiveElements.FIRE,  // 수극화
-      [FiveElements.FIRE]: FiveElements.METAL,  // 화극금
-      [FiveElements.METAL]: FiveElements.WOOD   // 금극목
+      [FiveElements.WATER]: FiveElements.FIRE, // 수극화
+      [FiveElements.FIRE]: FiveElements.METAL, // 화극금
+      [FiveElements.METAL]: FiveElements.WOOD, // 금극목
     };
 
-    if (generationMap[source] === target) return 'generate';
-    if (controlMap[source] === target) return 'control';
-    
+    if (generationMap[source] === target) return "generate";
+    if (controlMap[source] === target) return "control";
+
     // 역관계 확인
-    if (generationMap[target] === source) return 'generated';
-    if (controlMap[target] === source) return 'controlled';
+    if (generationMap[target] === source) return "generated";
+    if (controlMap[target] === source) return "controlled";
 
-    return 'same'; // 기본값
-  }
-
-  /**
-   * 십성 통계 분석
-   */
-  analyzeSipseongDistribution(sipseongMap: SipseongMap): Record<string, number> {
-    const distribution: Record<string, number> = {};
-    
-    // 모든 십성 초기화
-    Object.values(TenGods).forEach(god => {
-      distribution[god] = 0;
-    });
-
-    // 십성 카운트
-    Object.values(sipseongMap).forEach(god => {
-      if (distribution[god] !== undefined) {
-        distribution[god]++;
-      }
-    });
-
-    return distribution;
-  }
-
-  /**
-   * 주요 십성 특징 분석
-   */
-  analyzeSipseongCharacteristics(distribution: Record<string, number>): {
-    dominantGod: string;
-    missingGods: string[];
-    characteristics: string[];
-  } {
-    // 가장 많은 십성 찾기
-    let dominantGod = '';
-    let maxCount = 0;
-    
-    for (const [god, count] of Object.entries(distribution)) {
-      if (count > maxCount) {
-        maxCount = count;
-        dominantGod = god;
-      }
-    }
-
-    // 없는 십성 찾기
-    const missingGods = Object.entries(distribution)
-      .filter(([, count]) => count === 0)
-      .map(([god]) => god);
-
-    // 특징 분석
-    const characteristics: string[] = [];
-    
-    if (distribution[TenGods.JEONG_JAE] + distribution[TenGods.PYEON_JAE] >= 3) {
-      characteristics.push('재물운이 강함');
-    }
-    if (distribution[TenGods.JEONG_GWAN] + distribution[TenGods.PYEON_GWAN] >= 3) {
-      characteristics.push('관운이 강함');
-    }
-    if (distribution[TenGods.JEONG_IN] + distribution[TenGods.PYEON_IN] >= 3) {
-      characteristics.push('학업운이 강함');
-    }
-    if (distribution[TenGods.SIG_SIN] + distribution[TenGods.SANG_GWAN] >= 3) {
-      characteristics.push('예술성이 강함');
-    }
-    if (distribution[TenGods.BI_GYEON] + distribution[TenGods.GYEOB_JAE] >= 3) {
-      characteristics.push('독립성이 강함');
-    }
-
-    return {
-      dominantGod,
-      missingGods,
-      characteristics
-    };
+    return "same"; // 기본값
   }
 }

@@ -107,19 +107,10 @@ export interface PrimaryAnalysis {
   interactions: Interactions;
 }
 
-// 심층 분석 타입
-export interface InDepthAnalysis {
-  gyeokguk: string; // 격국
-  yongsin: string; // 용신
-  huisin: string; // 희신
-  gisin: string; // 기신
-}
-
 // 최종 사주 분석 객체 타입
 export interface SajuAnalysisObject {
   basic_info: BasicInfo;
   primary_analysis: PrimaryAnalysis;
-  in_depth_analysis: InDepthAnalysis;
 }
 
 // 천간 (天干) - Heavenly Stems

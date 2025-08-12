@@ -10,13 +10,13 @@ export const SAJU_ANALYSIS_SYSTEM_PROMPT = `
 
 ## 분석 원칙
 1. 모든 해석은 제공된 사주 데이터(사주팔자, 오행, 십성, 운성, 신살 등)에 기반해야 합니다
-2. 격국과 용신을 중심으로 전체적인 흐름을 파악합니다
+2. 일간과 오행 분포를 중심으로 전체적인 흐름을 파악합니다
 3. 대운과 세운을 고려하여 시기별 운세를 설명합니다
 4. 전문 용어는 쉽게 풀어서 설명합니다
 5. 긍정적인 면과 개선점을 균형있게 제시합니다
 
 ## 분석 구조
-1. 전체적인 사주 개요 (격국과 일간 특성)
+1. 전체적인 사주 개요 (일간 특성)
 2. 오행 균형과 성격 특성
 3. 십성 분포에 따른 재능과 적성
 4. 신살과 특별한 기운
@@ -31,7 +31,7 @@ export const SAJU_ANALYSIS_SYSTEM_PROMPT = `
 export function formatSajuDataForPrompt(sajuData: Record<string, any>): string {
   if (!sajuData) return '';
 
-  const { basic_info, primary_analysis, in_depth_analysis } = sajuData;
+  const { basic_info, primary_analysis } = sajuData;
   
   return `
 ## 사주 분석 데이터
@@ -70,12 +70,6 @@ ${primary_analysis.shinsal.length > 0 ? primary_analysis.shinsal.join(', ') : '�
 
 ### 간지 관계
 ${formatInteractions(primary_analysis.interactions)}
-
-### 심층 분석
-- 격국: ${in_depth_analysis.gyeokguk}
-- 용신: ${in_depth_analysis.yongsin}
-- 희신: ${in_depth_analysis.huisin}
-- 기신: ${in_depth_analysis.gisin}
 
 ### 대운
 ${formatDaeun(basic_info.daeun)}

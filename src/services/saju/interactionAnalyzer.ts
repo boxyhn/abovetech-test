@@ -324,42 +324,4 @@ export class InteractionAnalyzer {
     }
   }
 
-  /**
-   * 상호작용 영향 분석
-   */
-  analyzeInteractionEffects(interactions: Interactions): {
-    harmony: number;  // 조화도 (0-100)
-    conflict: number; // 갈등도 (0-100)
-    summary: string;
-  } {
-    // 긍정적 상호작용
-    const positiveCount = interactions.hap.length;
-    
-    // 부정적 상호작용
-    const negativeCount = 
-      interactions.chung.length + 
-      interactions.hyeong.length + 
-      interactions.pa.length + 
-      interactions.hae.length;
-
-    // 조화도와 갈등도 계산
-    const harmony = Math.min(100, positiveCount * 25);
-    const conflict = Math.min(100, negativeCount * 20);
-
-    // 종합 평가
-    let summary: string;
-    if (harmony > conflict + 20) {
-      summary = '조화로운 사주';
-    } else if (conflict > harmony + 20) {
-      summary = '도전적인 사주';
-    } else {
-      summary = '균형잡힌 사주';
-    }
-
-    return {
-      harmony,
-      conflict,
-      summary
-    };
-  }
 }
