@@ -68,13 +68,13 @@ export class ShinsalAnalyzer {
       shinsalList.push('공망');
     }
 
-    // 백호살 (白虎殺) - 년지 기준
-    if (this.hasBaekho(sajuPalja.year_pillar[1], branches)) {
+    // 백호살 (白虎殺) - 일주 기준
+    if (this.hasBaekho(sajuPalja)) {
       shinsalList.push('백호살');
     }
 
-    // 현침살 (懸針殺) - 일지 기준
-    if (this.hasHyeonChim(dayBranch, branches)) {
+    // 현침살 (懸針殺) - 사주 전체 확인
+    if (this.hasHyeonChim(sajuPalja)) {
       shinsalList.push('현침살');
     }
 
@@ -199,42 +199,76 @@ export class ShinsalAnalyzer {
 
   /**
    * 공망 판별
+   * 일주가 속한 60갑자 순중에 따라 결정
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private hasGongMang(_dayPillar: string, _branches: string[]): boolean {
-    // 일주의 순중 공망 계산 (간단한 버전)
-    // 갑자순의 공망은 술, 해
-    // 갑인순의 공망은 자, 축... 등
-    // 실제로는 더 복잡한 계산 필요
-    return false; // 간단한 구현을 위해 일단 false 반환
+  private hasGongMang(dayPillar: string, branches: string[]): boolean {
+    // 60갑자를 10개씩 나눈 순중별 공망
+    const gongMangMap: Record<string, string[]> = {
+      // 갑자순 (甲子~癸酉): 공망은 戌, 亥
+      '甲子': ['戌', '亥'], '乙丑': ['戌', '亥'], '丙寅': ['戌', '亥'], '丁卯': ['戌', '亥'], '戊辰': ['戌', '亥'],
+      '己巳': ['戌', '亥'], '庚午': ['戌', '亥'], '辛未': ['戌', '亥'], '壬申': ['戌', '亥'], '癸酉': ['戌', '亥'],
+      
+      // 갑술순 (甲戌~癸未): 공망은 申, 酉
+      '甲戌': ['申', '酉'], '乙亥': ['申', '酉'], '丙子': ['申', '酉'], '丁丑': ['申', '酉'], '戊寅': ['申', '酉'],
+      '己卯': ['申', '酉'], '庚辰': ['申', '酉'], '辛巳': ['申', '酉'], '壬午': ['申', '酉'], '癸未': ['申', '酉'],
+      
+      // 갑신순 (甲申~癸巳): 공망은 午, 未
+      '甲申': ['午', '未'], '乙酉': ['午', '未'], '丙戌': ['午', '未'], '丁亥': ['午', '未'], '戊子': ['午', '未'],
+      '己丑': ['午', '未'], '庚寅': ['午', '未'], '辛卯': ['午', '未'], '壬辰': ['午', '未'], '癸巳': ['午', '未'],
+      
+      // 갑오순 (甲午~癸卯): 공망은 辰, 巳
+      '甲午': ['辰', '巳'], '乙未': ['辰', '巳'], '丙申': ['辰', '巳'], '丁酉': ['辰', '巳'], '戊戌': ['辰', '巳'],
+      '己亥': ['辰', '巳'], '庚子': ['辰', '巳'], '辛丑': ['辰', '巳'], '壬寅': ['辰', '巳'], '癸卯': ['辰', '巳'],
+      
+      // 갑진순 (甲辰~癸丑): 공망은 寅, 卯
+      '甲辰': ['寅', '卯'], '乙巳': ['寅', '卯'], '丙午': ['寅', '卯'], '丁未': ['寅', '卯'], '戊申': ['寅', '卯'],
+      '己酉': ['寅', '卯'], '庚戌': ['寅', '卯'], '辛亥': ['寅', '卯'], '壬子': ['寅', '卯'], '癸丑': ['寅', '卯'],
+      
+      // 갑인순 (甲寅~癸亥): 공망은 子, 丑
+      '甲寅': ['子', '丑'], '乙卯': ['子', '丑'], '丙辰': ['子', '丑'], '丁巳': ['子', '丑'], '戊午': ['子', '丑'],
+      '己未': ['子', '丑'], '庚申': ['子', '丑'], '辛酉': ['子', '丑'], '壬戌': ['子', '丑'], '癸亥': ['子', '丑']
+    };
+    
+    const gongMangBranches = gongMangMap[dayPillar];
+    if (!gongMangBranches) return false;
+    
+    // 사주의 지지 중에 공망에 해당하는 지지가 있는지 확인
+    return gongMangBranches.some(gm => branches.includes(gm));
   }
 
   /**
    * 백호살 판별
+   * 특정 일주에서 성립하는 신살
    */
-  private hasBaekho(yearBranch: string, branches: string[]): boolean {
-    const baekhoMap: Record<string, string> = {
-      '子': '戌', '丑': '亥', '寅': '子', '卯': '丑',
-      '辰': '寅', '巳': '卯', '午': '辰', '未': '巳',
-      '申': '午', '酉': '未', '戌': '申', '亥': '酉'
-    };
+  private hasBaekho(sajuPalja: SajuPalja): boolean {
+    // 백호살이 성립하는 특정 일주
+    const baekhoJiju = ['甲辰', '乙未', '丙戌', '丁丑', '戊辰', '己未', '庚戌', '辛丑', '壬戌', '癸丑'];
     
-    const target = baekhoMap[yearBranch];
-    return target ? branches.includes(target) : false;
+    // 일주가 백호살에 해당하는지 확인
+    return baekhoJiju.includes(sajuPalja.day_pillar);
   }
 
   /**
    * 현침살 판별
+   * 뾰족한 모양의 글자가 사주에 있을 때 성립
    */
-  private hasHyeonChim(dayBranch: string, branches: string[]): boolean {
-    const hyeonChimMap: Record<string, string> = {
-      '子': '午', '丑': '未', '寅': '申', '卯': '酉',
-      '辰': '戌', '巳': '亥', '午': '子', '未': '丑',
-      '申': '寅', '酉': '卯', '戌': '辰', '亥': '巳'
-    };
+  private hasHyeonChim(sajuPalja: SajuPalja): boolean {
+    // 현침살에 해당하는 글자들 (뾰족한 모양)
+    // 천간: 甲, 辛
+    // 지지: 申, 卯, 午, 未
+    const hyeonChimGan = ['甲', '辛'];
+    const hyeonChimJi = ['申', '卯', '午', '未'];
     
-    const target = hyeonChimMap[dayBranch];
-    return target ? branches.includes(target) : false;
+    // 사주팔자의 모든 글자 추출
+    const allChars = [
+      sajuPalja.year_pillar[0], sajuPalja.year_pillar[1],
+      sajuPalja.month_pillar[0], sajuPalja.month_pillar[1],
+      sajuPalja.day_pillar[0], sajuPalja.day_pillar[1],
+      sajuPalja.hour_pillar[0], sajuPalja.hour_pillar[1]
+    ];
+    
+    // 천간이나 지지에 현침살 글자가 있는지 확인
+    return allChars.some(char => hyeonChimGan.includes(char) || hyeonChimJi.includes(char));
   }
 
   /**
@@ -251,25 +285,4 @@ export class ShinsalAnalyzer {
     return target ? branches.includes(target) : false;
   }
 
-  /**
-   * 신살 의미 해석
-   */
-  getShinsalMeaning(shinsal: string): string {
-    const meanings: Record<string, string> = {
-      '역마살': '이동수, 변동, 활동적인 기운',
-      '도화살': '인기, 매력, 이성운',
-      '화개살': '예술성, 종교성, 학문',
-      '천을귀인': '귀인의 도움, 행운',
-      '천의성': '의료, 치료, 건강 관련 재능',
-      '문창귀인': '학업, 문서, 지적 능력',
-      '양인살': '강한 의지, 추진력, 극단성',
-      '괴강살': '강직함, 리더십, 고집',
-      '공망': '허무, 변화, 영적 성향',
-      '백호살': '강한 성격, 돌발 상황',
-      '현침살': '예리함, 비판력, 갈등',
-      '홍염살': '매력, 이성 관계, 정열'
-    };
-    
-    return meanings[shinsal] || '특별한 기운';
-  }
 }
