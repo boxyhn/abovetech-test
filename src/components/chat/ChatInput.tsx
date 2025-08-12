@@ -79,7 +79,9 @@ export default function ChatInput({
 
   // Styles
   const wrapperClasses =
-    "fixed bottom-0 left-0 right-0 p-2.5 drop-shadow-custom";
+    "fixed bottom-0 left-0 right-0 flex justify-center p-2.5 drop-shadow-custom";
+  const innerWrapperClasses =
+    "relative w-full max-w-[375px]";
   const backgroundClasses =
     "absolute inset-0 chat-input-bg rounded-t-xl border border-white/20 -z-10";
   const containerClasses =
@@ -93,11 +95,12 @@ export default function ChatInput({
       <div className="h-[65px]" />
 
       <div className={wrapperClasses}>
-        {/* Background layer */}
-        <div className={backgroundClasses} />
+        <div className={innerWrapperClasses}>
+          {/* Background layer */}
+          <div className={backgroundClasses} />
 
-        {/* Content layer */}
-        <div className={containerClasses}>
+          {/* Content layer */}
+          <div className={containerClasses}>
           <div className="flex items-center gap-2 w-full">
             <ChatInputButton
               onClick={handlePlusClick}
@@ -146,6 +149,7 @@ export default function ChatInput({
               size={ICON_SIZE.send}
             />
           </ChatInputButton>
+        </div>
         </div>
       </div>
     </>

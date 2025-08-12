@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import ChatList, { Message } from "./ChatList";
 import ChatInput from "./chat/ChatInput";
 import ChatHeader from "./chat/ChatHeader";
+import ReportModal from "./chat/ReportModal";
 import { generateMessageId } from "@/utils/idGenerator";
 import { validateMessage, processMessage } from "@/utils/messageValidation";
 import { ApiClient } from "@/lib/api";
@@ -18,6 +19,8 @@ export default function ChatContainer() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [chatState, setChatState] = useState<ChatState>("INITIALIZING");
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [hasReport, setHasReport] = useState(false);
 
   // 세션 초기화
   useEffect(() => {
@@ -146,6 +149,11 @@ export default function ChatContainer() {
         if (response.status !== "ANALYZING") {
           clearInterval(checkInterval);
           setChatState("IDLE");
+          
+          // 분석이 완료되면 리포트가 있다고 표시
+          if (response.status === "READY") {
+            setHasReport(true);
+          }
 
           // 분석 완료 메시지가 있으면 추가
           if (
@@ -176,8 +184,9 @@ export default function ChatContainer() {
     <div className="flex flex-col h-screen">
       <ChatHeader
         onBack={() => {}} // TODO: 뒤로가기 핸들러 구현
-        onReport={() => {}} // TODO: 신고 핸들러 구현
-        coin={24500}
+        onReport={() => setIsReportModalOpen(true)}
+        // coin={24500} // 코인 기능 비활성화
+        isReportDisabled={!hasReport}
       />
       {chatState === "INITIALIZING" ? (
         <div className="flex-1 flex items-center justify-center">
@@ -202,6 +211,13 @@ export default function ChatContainer() {
             }
           />
         </>
+      )}
+      {sessionId && (
+        <ReportModal
+          sessionId={sessionId}
+          isOpen={isReportModalOpen}
+          onClose={() => setIsReportModalOpen(false)}
+        />
       )}
     </div>
   );

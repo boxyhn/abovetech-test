@@ -18,6 +18,7 @@ export interface Database {
           birth_time: string | null
           gender: string | null
           status: 'GATHERING_INFO' | 'ANALYZING' | 'READY'
+          analysis_result: string | null
         }
         Insert: {
           id?: string
@@ -27,6 +28,7 @@ export interface Database {
           birth_time?: string | null
           gender?: string | null
           status?: 'GATHERING_INFO' | 'ANALYZING' | 'READY'
+          analysis_result?: string | null
         }
         Update: {
           id?: string
@@ -36,6 +38,7 @@ export interface Database {
           birth_time?: string | null
           gender?: string | null
           status?: 'GATHERING_INFO' | 'ANALYZING' | 'READY'
+          analysis_result?: string | null
         }
       }
       messages: {
