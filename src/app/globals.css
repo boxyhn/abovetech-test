@@ -18,12 +18,13 @@
   --color-light-gray: #F5F5F5;
 }
 
+/* Dark mode disabled
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
   }
-}
+} */
 
 body {
   @apply bg-background text-foreground text-[14px] leading-[1.5] tracking-[-0.02em];
