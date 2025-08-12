@@ -20,14 +20,16 @@ const ReportModal: React.FC<ReportModalProps> = ({
   const [error, setError] = useState<string>("");
 
   useEffect(() => {
+    const abortController = new AbortController();
+    
     const fetchReport = async () => {
       setLoading(true);
       setError("");
       try {
-        const response = await fetch(`/api/chat/report/${sessionId}`);
+        const response = await fetch(`/api/chat/report/${sessionId}`, {
+          signal: abortController.signal
+        });
         const data = await response.json();
-
-        console.log(data);
 
         if (!response.ok) {
           throw new Error(data.error || "Failed to fetch report");
@@ -35,6 +37,10 @@ const ReportModal: React.FC<ReportModalProps> = ({
 
         setReport(data.report);
       } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') {
+          // Request was cancelled, no need to update state
+          return;
+        }
         setError(err instanceof Error ? err.message : "Failed to load report");
       } finally {
         setLoading(false);
@@ -44,6 +50,11 @@ const ReportModal: React.FC<ReportModalProps> = ({
     if (isOpen && sessionId) {
       fetchReport();
     }
+    
+    // Cleanup function to cancel request on unmount or when dependencies change
+    return () => {
+      abortController.abort();
+    };
   }, [isOpen, sessionId]);
 
   if (!isOpen) return null;

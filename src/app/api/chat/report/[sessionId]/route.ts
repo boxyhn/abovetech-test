@@ -7,6 +7,14 @@ export async function GET(
 ) {
   try {
     const { sessionId } = await params;
+    
+    // UUID validation to prevent SQL injection
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(sessionId)) {
+      return NextResponse.json(
+        { error: "Invalid session ID format" },
+        { status: 400 }
+      );
+    }
 
     const { data: session, error } = await supabase
       .from("sessions")

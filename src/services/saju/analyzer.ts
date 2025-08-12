@@ -50,7 +50,8 @@ export class SajuAnalyzerService {
 
       return response;
     } catch (error) {
-      console.error("사주 분석 중 오류:", error);
+      // Avoid logging sensitive user data
+      console.error("Failed to perform saju analysis");
       return null;
     }
   }
@@ -68,9 +69,12 @@ export class SajuAnalyzerService {
           "@/repositories/sessionRepository"
         );
         const savedData = await sessionRepository.getSajuAnalysis(userInfo.id);
-        if (savedData) {
+        if (savedData && typeof savedData === 'object') {
           console.log("Using saved saju analysis data");
-          return savedData as unknown as SajuAnalysisObject;
+          // Validate basic structure before casting
+          if ('basic_info' in savedData && 'primary_analysis' in savedData) {
+            return savedData as unknown as SajuAnalysisObject;
+          }
         }
       } catch (error) {
         console.error("Failed to fetch saved saju data:", error);
@@ -104,10 +108,13 @@ export class SajuAnalyzerService {
           const { sessionRepository } = await import(
             "@/repositories/sessionRepository"
           );
-          await sessionRepository.saveSajuAnalysis(
-            userInfo.id,
-            result as unknown as Record<string, unknown>
-          );
+          // Validate before saving
+          if (result && typeof result === 'object') {
+            await sessionRepository.saveSajuAnalysis(
+              userInfo.id,
+              result as unknown as Record<string, unknown>
+            );
+          }
           console.log("Newly calculated saju data saved");
         } catch (error) {
           console.error("Failed to save saju data:", error);
@@ -116,7 +123,7 @@ export class SajuAnalyzerService {
 
       return result;
     } catch (error) {
-      console.error("사주 계산 오류:", error);
+      console.error("Failed to calculate saju data");
       return null;
     }
   }
@@ -196,7 +203,8 @@ ${sajuDataText}
 
       return response;
     } catch (error) {
-      console.error("질의응답 처리 중 오류:", error);
+      // Avoid logging sensitive user data
+      console.error("Failed to process Q&A");
       return null;
     }
   }
